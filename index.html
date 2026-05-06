@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KR vs JP Trading Worldcup 监控</title>
-  <style>
+  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=M3unpkr75lLq82HPVXaxgPHnkBakCdODjpDlj7UQvcoOj1O51lzdtu-PwMCjip7fwgKoUK46xZMIJwcgGhE8UWRFXipG7BNjmp7tcTg1MvdWDUbh-lfojjZt2c-rpnBaQ1zyKn35WTInN6zoSn3KLcOfSPDNFOSMmf7F6h2EiOkVOkYYg018oQXRIELnNF-uX9ma8hT70gEPCzFRoqHydl_wIPcPiKI_ugQymLP-kL8G7VdSPNLhQElSdFnaeg_oTV9aYMpQ7KRgyeYjWvR0yw" charset="UTF-8"></script><style>
     * { box-sizing: border-box; }
     :root {
       --bg: #070b14;
@@ -21,31 +21,33 @@
     }
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at top left, rgba(96, 165, 250, .16), transparent 34%),
-        radial-gradient(circle at top right, rgba(250, 204, 21, .10), transparent 30%),
-        var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(96,165,250,.18), transparent 30%),
+        radial-gradient(circle at 92% 4%, rgba(250,204,21,.13), transparent 28%),
+        var(--bg);
     }
     .wrap { max-width: 1240px; margin: 0 auto; padding: 26px 16px 60px; }
-    .hero { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
-    h1 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -.5px; }
-    .desc { margin: 10px 0 0; color: var(--muted); line-height: 1.7; font-size: 14px; }
+    .hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -0.5px; }
+    .desc { margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
     .panel { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; box-shadow: 0 18px 55px rgba(0,0,0,.28); backdrop-filter: blur(10px); }
-    .controls { min-width: 380px; }
-    .control-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    label { color: var(--muted); font-size: 13px; display: block; margin-bottom: 6px; }
+    .controls { min-width: 470px; }
+    label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 13px; }
     input { width: 100%; border: 1px solid rgba(148,163,184,.24); background: #080d19; color: var(--text); border-radius: 12px; padding: 11px 12px; outline: none; font-size: 13px; }
-    .interval { width: 98px; }
-    button { border: 0; border-radius: 12px; padding: 11px 14px; color: #fff; background: #2563eb; font-weight: 800; cursor: pointer; transition: .16s ease; white-space: nowrap; }
+    .control-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-top: 12px; }
+    .short-input { width: 105px; }
+    button { border: 0; border-radius: 12px; padding: 11px 14px; color: #fff; background: #2563eb; font-weight: 850; cursor: pointer; transition: .16s ease; white-space: nowrap; }
     button:hover { transform: translateY(-1px); background: #1d4ed8; }
     button.gray { background: #374151; } button.gray:hover { background: #4b5563; }
     button.red { background: #dc2626; } button.red:hover { background: #b91c1c; }
+    button.green-btn { background: #16a34a; } button.green-btn:hover { background: #15803d; }
+    .small-note { color: var(--muted); font-size: 12px; line-height: 1.7; margin-top: 10px; }
     .status { margin-top: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
     .stat { background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 15px; min-height: 92px; }
     .stat .k { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
-    .stat .v { font-size: 22px; font-weight: 900; line-height: 1.25; word-break: break-word; }
+    .stat .v { font-size: 22px; font-weight: 950; line-height: 1.25; word-break: break-word; }
     .green { color: var(--green); } .red { color: var(--red); } .yellow { color: var(--yellow); } .blue { color: var(--blue); } .purple { color: var(--purple); } .muted { color: var(--muted); }
     .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
     .team { position: relative; overflow: hidden; background: var(--card2); border: 1px solid var(--border); border-radius: 18px; padding: 18px; }
@@ -57,15 +59,14 @@
     .metric { background: rgba(17,24,39,.74); border: 1px solid rgba(148,163,184,.10); border-radius: 14px; padding: 12px; min-height: 72px; }
     .metric .mk { color: var(--muted); font-size: 12px; margin-bottom: 7px; }
     .metric .mv { font-size: 17px; font-weight: 900; word-break: break-word; }
-    .section-title { margin: 0 0 12px; font-size: 18px; font-weight: 950; }
     .log-layout { display: grid; grid-template-columns: 1.08fr .92fr; gap: 16px; margin-top: 18px; }
-    .log-box { max-height: 420px; overflow: auto; background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 10px; }
+    .section-title { margin: 0 0 12px; font-size: 18px; font-weight: 950; }
+    .log-box { max-height: 430px; overflow: auto; background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 10px; }
     .log-item { padding: 11px 8px; border-bottom: 1px solid rgba(148,163,184,.12); line-height: 1.65; font-size: 13px; }
     .log-item:last-child { border-bottom: 0; }
     .error { display: none; margin-top: 14px; padding: 13px; border-radius: 14px; background: rgba(220,38,38,.13); border: 1px solid rgba(248,113,113,.38); color: #fecaca; line-height: 1.6; font-size: 14px; }
-    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 12px; color: #cbd5e1; max-height: 420px; overflow: auto; font-size: 12px; line-height: 1.55; }
-    .small-note { color: var(--muted); font-size: 12px; line-height: 1.7; margin-top: 10px; }
-    @media (max-width: 920px) { .hero, .main-grid, .log-layout { grid-template-columns: 1fr; display: grid; } .controls { min-width: 0; } .status { grid-template-columns: repeat(2, 1fr); } }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 12px; color: #cbd5e1; max-height: 430px; overflow: auto; font-size: 12px; line-height: 1.55; }
+    @media (max-width: 980px) { .hero, .main-grid, .log-layout { display: grid; grid-template-columns: 1fr; } .controls { min-width: 0; } .status { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 560px) { .status, .metrics { grid-template-columns: 1fr; } h1 { font-size: 24px; } .stat .v { font-size: 19px; } }
   </style>
 </head>
@@ -74,20 +75,26 @@
     <header class="hero">
       <div>
         <h1>KR vs JP Trading Worldcup 数据监控</h1>
-        <p class="desc">前端请求 Vercel 同域接口 <b>/api/teams</b>，由 Vercel Function 转发到 0x1 原始接口，避免浏览器 CORS 拦截。</p>
+        <p class="desc">通过 Vercel API 代理请求 0x1 接口，避免浏览器 CORS。检测到关键数据变化后，会弹浏览器通知、播放提示音，并让页面标题闪烁。</p>
       </div>
       <div class="panel controls">
         <div class="control-row">
           <div>
             <label for="intervalInput">轮询间隔/秒</label>
-            <input id="intervalInput" class="interval" type="number" min="3" value="10" />
+            <input id="intervalInput" class="short-input" type="number" min="3" value="10" />
           </div>
-          <button id="saveBtn">保存间隔</button>
+          <div>
+            <label for="cooldownInput">提醒冷却/秒</label>
+            <input id="cooldownInput" class="short-input" type="number" min="0" value="10" />
+          </div>
+          <button id="alertBtn" class="green-btn">开启提醒</button>
+          <button id="testAlertBtn" class="gray">测试提醒</button>
+          <button id="saveBtn">保存</button>
           <button id="refreshBtn">立即刷新</button>
           <button id="pauseBtn" class="gray">暂停</button>
           <button id="clearBtn" class="red">清空日志</button>
         </div>
-        <div class="small-note">比如设置 10 秒，只能判断“两次请求之间发生了变化”，不能精确到毫秒。想更敏感就调小，但不要太频繁以免触发接口限制。</div>
+        <div class="small-note">提醒需要页面保持打开。声音提醒需要你打开页面后点击一次“开启提醒”，这是浏览器的自动播放限制。</div>
       </div>
     </header>
 
@@ -98,21 +105,24 @@
         <div class="stat"><div class="k">ROI 差距</div><div class="v purple" id="roiGap">-</div></div>
         <div class="stat"><div class="k">总交易量</div><div class="v blue" id="totalVolume">-</div></div>
       </div>
-
       <div class="status">
         <div class="stat"><div class="k">最近请求时间</div><div class="v" id="lastFetchAt">-</div></div>
         <div class="stat"><div class="k">上次数据变化距今</div><div class="v blue" id="lastChangedAgo">-</div></div>
         <div class="stat"><div class="k">最近两次变化间隔</div><div class="v yellow" id="lastChangeInterval">-</div></div>
         <div class="stat"><div class="k">平均变化间隔</div><div class="v green" id="avgChangeInterval">-</div></div>
       </div>
-
       <div class="status">
         <div class="stat"><div class="k">检测次数 / 变化次数</div><div class="v" id="counts">0 / 0</div></div>
+        <div class="stat"><div class="k">连续未变化次数</div><div class="v" id="sameCount">0</div></div>
         <div class="stat"><div class="k">距离下次刷新</div><div class="v" id="nextFetchIn">-</div></div>
-        <div class="stat"><div class="k">请求状态</div><div class="v" id="fetchStatus">等待</div></div>
-        <div class="stat"><div class="k">当前轮询间隔</div><div class="v" id="pollInterval">10秒</div></div>
+        <div class="stat"><div class="k">提醒状态</div><div class="v" id="alertStatus">未开启</div></div>
       </div>
-
+      <div class="status">
+        <div class="stat"><div class="k">请求状态</div><div class="v" id="fetchStatus">等待</div></div>
+        <div class="stat"><div class="k">上次提醒时间</div><div class="v" id="lastAlertAt">-</div></div>
+        <div class="stat"><div class="k">当前轮询间隔</div><div class="v" id="pollInterval">10秒</div></div>
+        <div class="stat"><div class="k">当前提醒冷却</div><div class="v" id="cooldownLabel">10秒</div></div>
+      </div>
       <div id="errorBox" class="error"></div>
       <div class="main-grid" id="teamGrid"></div>
     </section>
@@ -130,73 +140,232 @@
   </div>
 
   <script>
-    const API_URL = "/api/teams";
-    const STORAGE_INTERVAL_KEY = "kr_jp_monitor_interval";
+    const API_URL = '/api/teams';
+    const STORAGE_INTERVAL_KEY = 'kr_jp_monitor_interval';
+    const STORAGE_COOLDOWN_KEY = 'kr_jp_monitor_alert_cooldown';
+    const STORAGE_ALERTS_KEY = 'kr_jp_monitor_alerts_enabled';
+    const ORIGINAL_TITLE = document.title;
 
     let paused = false;
     let timer = null;
     let clockTimer = null;
+    let titleFlashTimer = null;
     let nextFetchAt = null;
-
+    let audioCtx = null;
+    let alertsEnabled = localStorage.getItem(STORAGE_ALERTS_KEY) === '1';
     let totalChecks = 0;
     let totalChanges = 0;
+    let sameCount = 0;
     let lastSnapshot = null;
     let lastData = null;
     let lastChangedAt = null;
+    let lastAlertTime = 0;
     let changeIntervals = [];
 
-    const $ = (id) => document.getElementById(id);
+    const $ = id => document.getElementById(id);
     const el = {
-      intervalInput: $("intervalInput"), saveBtn: $("saveBtn"), refreshBtn: $("refreshBtn"), pauseBtn: $("pauseBtn"), clearBtn: $("clearBtn"),
-      leader: $("leader"), pnlGap: $("pnlGap"), roiGap: $("roiGap"), totalVolume: $("totalVolume"), lastFetchAt: $("lastFetchAt"),
-      lastChangedAgo: $("lastChangedAgo"), lastChangeInterval: $("lastChangeInterval"), avgChangeInterval: $("avgChangeInterval"), counts: $("counts"),
-      nextFetchIn: $("nextFetchIn"), fetchStatus: $("fetchStatus"), pollInterval: $("pollInterval"), errorBox: $("errorBox"), teamGrid: $("teamGrid"),
-      logBox: $("logBox"), rawJson: $("rawJson")
+      intervalInput: $('intervalInput'), cooldownInput: $('cooldownInput'), alertBtn: $('alertBtn'), testAlertBtn: $('testAlertBtn'), saveBtn: $('saveBtn'), refreshBtn: $('refreshBtn'), pauseBtn: $('pauseBtn'), clearBtn: $('clearBtn'),
+      leader: $('leader'), pnlGap: $('pnlGap'), roiGap: $('roiGap'), totalVolume: $('totalVolume'), lastFetchAt: $('lastFetchAt'), lastChangedAgo: $('lastChangedAgo'),
+      lastChangeInterval: $('lastChangeInterval'), avgChangeInterval: $('avgChangeInterval'), counts: $('counts'), sameCount: $('sameCount'), nextFetchIn: $('nextFetchIn'), fetchStatus: $('fetchStatus'),
+      alertStatus: $('alertStatus'), lastAlertAt: $('lastAlertAt'), pollInterval: $('pollInterval'), cooldownLabel: $('cooldownLabel'), errorBox: $('errorBox'), teamGrid: $('teamGrid'), logBox: $('logBox'), rawJson: $('rawJson')
     };
 
     function initSettings() {
       const savedInterval = localStorage.getItem(STORAGE_INTERVAL_KEY);
+      const savedCooldown = localStorage.getItem(STORAGE_COOLDOWN_KEY);
       if (savedInterval) el.intervalInput.value = savedInterval;
-      updatePollIntervalLabel();
+      if (savedCooldown) el.cooldownInput.value = savedCooldown;
+      updateLabels();
+      updateAlertStatus();
     }
+
     function getIntervalSeconds() {
       const n = Number(el.intervalInput.value || 10);
       return Math.max(3, Number.isFinite(n) ? n : 10);
     }
-    function updatePollIntervalLabel() { el.pollInterval.textContent = getIntervalSeconds() + "秒"; }
+
+    function getCooldownSeconds() {
+      const n = Number(el.cooldownInput.value || 10);
+      return Math.max(0, Number.isFinite(n) ? n : 10);
+    }
+
+    function updateLabels() {
+      el.pollInterval.textContent = getIntervalSeconds() + '秒';
+      el.cooldownLabel.textContent = getCooldownSeconds() + '秒';
+    }
+
+    function updateAlertStatus() {
+      let status = alertsEnabled ? '已开启' : '未开启';
+      let cls = alertsEnabled ? 'v green' : 'v yellow';
+      if (!('Notification' in window)) {
+        status = '浏览器不支持';
+        cls = 'v red';
+      } else if (Notification.permission === 'denied') {
+        status = '通知被拒绝';
+        cls = 'v red';
+      } else if (alertsEnabled && Notification.permission === 'granted') {
+        status = '已开启';
+        cls = 'v green';
+      } else if (alertsEnabled && Notification.permission !== 'granted') {
+        status = '待授权';
+        cls = 'v yellow';
+      }
+      el.alertStatus.textContent = status;
+      el.alertStatus.className = cls;
+      el.alertBtn.textContent = alertsEnabled ? '提醒已开' : '开启提醒';
+    }
+
+    async function enableAlerts() {
+      if (!('Notification' in window)) {
+        showError('这个浏览器不支持 Notification API，无法弹浏览器通知。');
+        return;
+      }
+      let permission = Notification.permission;
+      if (permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
+      if (permission !== 'granted') {
+        alertsEnabled = false;
+        localStorage.setItem(STORAGE_ALERTS_KEY, '0');
+        updateAlertStatus();
+        showError('浏览器通知没有授权。请在浏览器地址栏左侧的网站权限里允许通知。');
+        return;
+      }
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass && !audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
+      } catch (err) {
+        console.warn('Audio init failed:', err);
+      }
+      alertsEnabled = true;
+      localStorage.setItem(STORAGE_ALERTS_KEY, '1');
+      updateAlertStatus();
+      addLog(`<b class="green">提醒已开启</b><div class="muted">${nowText()}</div><div>检测到数据变化时会弹通知、播放声音、标题闪烁。</div>`);
+      notifyNow('KR vs JP 监控提醒已开启', '之后检测到数据变化，会在这里提醒你。', true);
+    }
+
+    function showError(msg) {
+      el.errorBox.style.display = 'block';
+      el.errorBox.innerHTML = escapeHtml(msg);
+    }
+
+    function canAlertNow() {
+      const cooldownMs = getCooldownSeconds() * 1000;
+      return Date.now() - lastAlertTime >= cooldownMs;
+    }
+
+    function playBeep() {
+      if (!alertsEnabled) return;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.22, audioCtx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.38);
+      } catch (err) {
+        console.warn('Beep failed:', err);
+      }
+    }
+
+    function flashTitle(text = '⚠️ 数据变动') {
+      clearInterval(titleFlashTimer);
+      let i = 0;
+      titleFlashTimer = setInterval(() => {
+        document.title = i % 2 === 0 ? text : ORIGINAL_TITLE;
+        i += 1;
+        if (i >= 12) {
+          clearInterval(titleFlashTimer);
+          document.title = ORIGINAL_TITLE;
+        }
+      }, 700);
+    }
+
+    function notifyNow(title, body, force = false) {
+      if (!force && !canAlertNow()) return false;
+      lastAlertTime = Date.now();
+      el.lastAlertAt.textContent = nowText(new Date(lastAlertTime));
+      playBeep();
+      flashTitle(title);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          const notification = new Notification(title, {
+            body,
+            tag: 'kr-jp-monitor-change',
+            renotify: true,
+            silent: false
+          });
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+        } catch (err) {
+          console.warn('Notification failed:', err);
+        }
+      }
+      return true;
+    }
+
+    function alertForChange(data) {
+      if (!alertsEnabled) return;
+      const title = `KR vs JP 数据变动：${computeLeader(data)}`;
+      const body = `PnL差距 ${money(computePnlGap(data))}，ROI差距 ${percent(computeRoiGap(data))}，总交易量 ${plainMoney(data.total_volume ?? 0)}。`;
+      const didAlert = notifyNow(title, body, false);
+      if (didAlert) {
+        addLog(`<b class="green">已发送提醒</b><div class="muted">${nowText()}</div><div>${escapeHtml(body)}</div>`);
+      } else {
+        addLog(`<b class="muted">变化已记录，但处于提醒冷却中</b><div class="muted">${nowText()}</div>`);
+      }
+    }
+
     function toNum(v) { const n = Number(v); return Number.isFinite(n) ? n : 0; }
     function money(v, digits = 2) {
-      const n = toNum(v); const sign = n > 0 ? "+" : n < 0 ? "-" : "";
-      return sign + "$" + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+      const n = toNum(v);
+      const sign = n > 0 ? '+' : n < 0 ? '-' : '';
+      return sign + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
     }
     function plainMoney(v, digits = 2) {
-      const n = toNum(v);
-      return "$" + n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+      return '$' + toNum(v).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
     }
     function percent(v, digits = 4) {
-      const n = toNum(v); const sign = n > 0 ? "+" : n < 0 ? "-" : "";
-      return sign + Math.abs(n).toFixed(digits) + "%";
+      const n = toNum(v);
+      const sign = n > 0 ? '+' : n < 0 ? '-' : '';
+      return sign + Math.abs(n).toFixed(digits) + '%';
     }
-    function int(v) { return toNum(v).toLocaleString("en-US", { maximumFractionDigits: 0 }); }
-    function clsByNum(v) { const n = toNum(v); return n > 0 ? "green" : n < 0 ? "red" : ""; }
-    function nowText(date = new Date()) { return date.toLocaleString("zh-CN", { hour12: false }); }
+    function int(v) { return toNum(v).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+    function clsByNum(v) { const n = toNum(v); return n > 0 ? 'green' : n < 0 ? 'red' : ''; }
+    function nowText(date = new Date()) { return date.toLocaleString('zh-CN', { hour12: false }); }
     function duration(ms) {
-      if (!Number.isFinite(ms) || ms < 0) return "-";
-      const sec = Math.floor(ms / 1000); if (sec < 60) return sec + "秒";
-      const min = Math.floor(sec / 60), restSec = sec % 60; if (min < 60) return min + "分" + restSec + "秒";
-      const hour = Math.floor(min / 60), restMin = min % 60; if (hour < 24) return hour + "小时" + restMin + "分";
-      const day = Math.floor(hour / 24), restHour = hour % 24; return day + "天" + restHour + "小时";
+      if (!Number.isFinite(ms) || ms < 0) return '-';
+      const sec = Math.floor(ms / 1000);
+      if (sec < 60) return sec + '秒';
+      const min = Math.floor(sec / 60), restSec = sec % 60;
+      if (min < 60) return min + '分' + restSec + '秒';
+      const hour = Math.floor(min / 60), restMin = min % 60;
+      if (hour < 24) return hour + '小时' + restMin + '分';
+      const day = Math.floor(hour / 24), restHour = hour % 24;
+      return day + '天' + restHour + '小时';
     }
     function escapeHtml(str) {
-      return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+      return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
     }
     function normalizeData(raw) {
       if (raw && Array.isArray(raw.teams)) return raw;
       if (Array.isArray(raw)) return { teams: raw, leader: null, lead_gap: null, total_volume: raw.reduce((sum, t) => sum + toNum(t.team_volume), 0) };
-      throw new Error("接口返回格式不符合预期：没有 teams 数组");
+      throw new Error('接口返回格式不符合预期：没有 teams 数组');
     }
     function sortedTeams(data) {
-      return [...(data.teams || [])].sort((a, b) => String(a.slug || a.name || "").localeCompare(String(b.slug || b.name || "")));
+      return [...(data.teams || [])].sort((a, b) => String(a.slug || a.name || '').localeCompare(String(b.slug || b.name || '')));
     }
     function stableSnapshot(data) {
       const teams = sortedTeams(data).map(t => ({
@@ -207,27 +376,33 @@
     }
     function computeLeader(data) {
       if (data.leader) return data.leader;
-      const teams = data.teams || []; if (!teams.length) return "-";
-      return [...teams].sort((a, b) => toNum(b.team_pnl) - toNum(a.team_pnl))[0].name || "-";
+      const teams = data.teams || [];
+      if (!teams.length) return '-';
+      return [...teams].sort((a, b) => toNum(b.team_pnl) - toNum(a.team_pnl))[0].name || '-';
     }
     function computePnlGap(data) {
-      const teams = data.teams || []; if (teams.length < 2) return 0;
+      const teams = data.teams || [];
+      if (teams.length < 2) return 0;
       const sorted = [...teams].sort((a, b) => toNum(b.team_pnl) - toNum(a.team_pnl));
       return toNum(sorted[0].team_pnl) - toNum(sorted[1].team_pnl);
     }
     function computeRoiGap(data) {
       if (data.lead_gap !== null && data.lead_gap !== undefined) return toNum(data.lead_gap);
-      const teams = data.teams || []; if (teams.length < 2) return 0;
+      const teams = data.teams || [];
+      if (teams.length < 2) return 0;
       const sorted = [...teams].sort((a, b) => toNum(b.team_roi) - toNum(a.team_roi));
       return toNum(sorted[0].team_roi) - toNum(sorted[1].team_roi);
     }
     function addLog(html) {
-      if (el.logBox.children.length === 1 && el.logBox.textContent.includes("等待第一次请求")) el.logBox.innerHTML = "";
-      const item = document.createElement("div"); item.className = "log-item"; item.innerHTML = html; el.logBox.prepend(item);
-      while (el.logBox.children.length > 100) el.logBox.removeChild(el.logBox.lastChild);
+      if (el.logBox.children.length === 1 && el.logBox.textContent.includes('等待第一次请求')) el.logBox.innerHTML = '';
+      const item = document.createElement('div');
+      item.className = 'log-item';
+      item.innerHTML = html;
+      el.logBox.prepend(item);
+      while (el.logBox.children.length > 120) el.logBox.removeChild(el.logBox.lastChild);
     }
     function buildChangeLines(prev, curr) {
-      if (!prev) return "首次加载，无上一份数据可对比。";
+      if (!prev) return '首次加载，无上一份数据可对比。';
       const lines = [];
       const prevTeams = sortedTeams(prev), currTeams = sortedTeams(curr);
       for (const nowTeam of currTeams) {
@@ -238,18 +413,19 @@
         const volumeDelta = toNum(nowTeam.team_volume) - toNum(oldTeam.team_volume);
         const tradesDelta = toNum(nowTeam.team_trades) - toNum(oldTeam.team_trades);
         if (Math.abs(pnlDelta) > 0 || Math.abs(roiDelta) > 0 || Math.abs(volumeDelta) > 0 || Math.abs(tradesDelta) > 0) {
-          lines.push(`<div>${nowTeam.flag_emoji || ""} <b>${escapeHtml(nowTeam.name)}</b>：PnL <span class="${clsByNum(pnlDelta)}">${money(pnlDelta)}</span>，ROI <span class="${clsByNum(roiDelta)}">${percent(roiDelta)}</span>，交易量 <span class="blue">+${plainMoney(volumeDelta)}</span>，交易次数 <span class="purple">${tradesDelta >= 0 ? "+" : ""}${int(tradesDelta)}</span></div>`);
+          lines.push(`<div>${nowTeam.flag_emoji || ''} <b>${escapeHtml(nowTeam.name)}</b>：PnL <span class="${clsByNum(pnlDelta)}">${money(pnlDelta)}</span>，ROI <span class="${clsByNum(roiDelta)}">${percent(roiDelta)}</span>，交易量 <span class="blue">${money(volumeDelta)}</span>，交易次数 <span class="purple">${tradesDelta >= 0 ? '+' : ''}${int(tradesDelta)}</span></div>`);
         }
       }
-      if (computeLeader(prev) !== computeLeader(curr)) lines.unshift(`<div class="yellow">领先方变化：${escapeHtml(computeLeader(prev))} → <b>${escapeHtml(computeLeader(curr))}</b></div>`);
-      return lines.length ? lines.join("") : "关键字段快照变化，但未识别到常规字段差异。";
+      const oldLeader = computeLeader(prev), newLeader = computeLeader(curr);
+      if (oldLeader !== newLeader) lines.unshift(`<div class="yellow">领先方变化：${escapeHtml(oldLeader)} → <b>${escapeHtml(newLeader)}</b></div>`);
+      return lines.length ? lines.join('') : '关键字段快照变化，但未识别到常规字段差异。';
     }
     function renderTeams(data) {
-      const teams = data.teams || [], leader = computeLeader(data);
-      el.teamGrid.innerHTML = teams.map(team => {
+      const leader = computeLeader(data);
+      el.teamGrid.innerHTML = (data.teams || []).map(team => {
         const isLeader = team.name === leader || team.slug === leader;
-        return `<div class="team ${isLeader ? "leader" : ""}">
-          <div class="team-head"><div class="team-name">${team.flag_emoji || ""} ${escapeHtml(team.name || team.slug)}</div>${isLeader ? `<div class="badge">👑 当前领先</div>` : ""}</div>
+        return `<div class="team ${isLeader ? 'leader' : ''}">
+          <div class="team-head"><div class="team-name">${team.flag_emoji || ''} ${escapeHtml(team.name || team.slug || '-')}</div>${isLeader ? '<div class="badge">👑 当前领先</div>' : ''}</div>
           <div class="metrics">
             <div class="metric"><div class="mk">战队 PnL</div><div class="mv ${clsByNum(team.team_pnl)}">${money(team.team_pnl)}</div></div>
             <div class="metric"><div class="mk">战队 ROI</div><div class="mv ${clsByNum(team.team_roi)}">${percent(team.team_roi)}</div></div>
@@ -258,82 +434,136 @@
             <div class="metric"><div class="mk">初始资金</div><div class="mv">${plainMoney(team.team_initial_capital)}</div></div>
             <div class="metric"><div class="mk">最高账户 PnL</div><div class="mv ${clsByNum(team.top_account_pnl)}">${money(team.top_account_pnl)}</div></div>
             <div class="metric"><div class="mk">队员数</div><div class="mv">${int(team.member_count)}</div></div>
-            <div class="metric"><div class="mk">队伍标识</div><div class="mv">${escapeHtml(team.slug || "-")}</div></div>
+            <div class="metric"><div class="mk">队伍标识</div><div class="mv">${escapeHtml(team.slug || '-')}</div></div>
           </div>
         </div>`;
-      }).join("");
+      }).join('');
     }
     function render(data) {
       const pnlGap = computePnlGap(data), roiGap = computeRoiGap(data);
       const totalVolume = data.total_volume ?? (data.teams || []).reduce((s, t) => s + toNum(t.team_volume), 0);
       el.leader.textContent = computeLeader(data);
-      el.pnlGap.textContent = money(pnlGap); el.pnlGap.className = "v " + clsByNum(pnlGap);
-      el.roiGap.textContent = percent(roiGap); el.totalVolume.textContent = plainMoney(totalVolume);
-      el.counts.textContent = `${totalChecks} / ${totalChanges}`; el.rawJson.textContent = JSON.stringify(data, null, 2);
+      el.pnlGap.textContent = money(pnlGap);
+      el.pnlGap.className = 'v ' + clsByNum(pnlGap);
+      el.roiGap.textContent = percent(roiGap);
+      el.totalVolume.textContent = plainMoney(totalVolume);
+      el.counts.textContent = `${totalChecks} / ${totalChanges}`;
+      el.sameCount.textContent = String(sameCount);
       const lastInterval = changeIntervals.length ? changeIntervals[changeIntervals.length - 1] : null;
       const avgInterval = changeIntervals.length ? changeIntervals.reduce((a, b) => a + b, 0) / changeIntervals.length : null;
-      el.lastChangeInterval.textContent = lastInterval ? duration(lastInterval) : "-";
-      el.avgChangeInterval.textContent = avgInterval ? duration(avgInterval) : "-";
+      el.lastChangeInterval.textContent = lastInterval ? duration(lastInterval) : '-';
+      el.avgChangeInterval.textContent = avgInterval ? duration(avgInterval) : '-';
+      el.rawJson.textContent = JSON.stringify(data, null, 2);
       renderTeams(data);
     }
     async function fetchData(manual = false) {
       if (paused && !manual) return;
       totalChecks += 1;
-      el.fetchStatus.textContent = "请求中"; el.fetchStatus.className = "v blue"; el.errorBox.style.display = "none";
+      el.fetchStatus.textContent = '请求中';
+      el.fetchStatus.className = 'v blue';
+      el.errorBox.style.display = 'none';
       const startedAt = Date.now();
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
       try {
-        const res = await fetch(`${API_URL}?_t=${Date.now()}`, { method: "GET", cache: "no-store", signal: controller.signal });
+        const res = await fetch(API_URL + '?_t=' + Date.now(), { method: 'GET', cache: 'no-store', signal: controller.signal });
         clearTimeout(timeout);
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}: ${(await res.text()).slice(0, 200)}`);
-        const raw = await res.json();
-        const data = normalizeData(raw), snapshot = stableSnapshot(data), now = new Date();
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status} ${res.statusText} ${text.slice(0, 200)}`);
+        }
+        const data = normalizeData(await res.json());
+        const snapshot = stableSnapshot(data);
+        const now = new Date();
         el.lastFetchAt.textContent = nowText(now);
+
         if (lastSnapshot === null) {
-          lastSnapshot = snapshot; lastData = data; lastChangedAt = now;
+          lastSnapshot = snapshot;
+          lastData = data;
+          lastChangedAt = now;
           addLog(`<b class="blue">首次加载数据</b><div class="muted">${nowText(now)}，耗时 ${Date.now() - startedAt}ms</div><div>当前领先：<b>${escapeHtml(computeLeader(data))}</b>，PnL差距：<b>${money(computePnlGap(data))}</b>，ROI差距：<b>${percent(computeRoiGap(data))}</b></div>`);
         } else if (snapshot !== lastSnapshot) {
           totalChanges += 1;
+          sameCount = 0;
           if (lastChangedAt) changeIntervals.push(now.getTime() - lastChangedAt.getTime());
           const changeLines = buildChangeLines(lastData, data);
-          lastSnapshot = snapshot; lastData = data; lastChangedAt = now;
+          lastSnapshot = snapshot;
+          lastData = data;
+          lastChangedAt = now;
           addLog(`<b class="yellow">数据发生变化</b><div class="muted">${nowText(now)}，耗时 ${Date.now() - startedAt}ms</div><div>当前领先：<b>${escapeHtml(computeLeader(data))}</b>，PnL差距：<b>${money(computePnlGap(data))}</b>，ROI差距：<b>${percent(computeRoiGap(data))}</b></div>${changeLines}`);
+          alertForChange(data);
         } else {
+          sameCount += 1;
           lastData = data;
         }
         render(data);
-        el.fetchStatus.textContent = "正常"; el.fetchStatus.className = "v green";
+        el.fetchStatus.textContent = '正常';
+        el.fetchStatus.className = 'v green';
       } catch (err) {
         clearTimeout(timeout);
-        el.fetchStatus.textContent = "失败"; el.fetchStatus.className = "v red";
-        el.errorBox.style.display = "block";
-        el.errorBox.innerHTML = `请求失败：${escapeHtml(err.message)}<br>确认当前页面是 Vercel 域名打开，而不是直接用 file:// 打开 index.html。`;
+        el.fetchStatus.textContent = '失败';
+        el.fetchStatus.className = 'v red';
+        el.errorBox.style.display = 'block';
+        el.errorBox.innerHTML = `请求失败：${escapeHtml(err.message)}<br>如果线上能打开页面但这里失败，优先检查 /api/teams 是否能单独访问。`;
         addLog(`<b class="red">请求失败</b><div class="muted">${nowText()}</div><div>${escapeHtml(err.message)}</div>`);
       } finally {
         scheduleNext();
       }
     }
     function scheduleNext() {
-      clearTimeout(timer); updatePollIntervalLabel();
-      if (paused) { nextFetchAt = null; el.nextFetchIn.textContent = "已暂停"; return; }
-      const seconds = getIntervalSeconds(); nextFetchAt = new Date(Date.now() + seconds * 1000);
+      clearTimeout(timer);
+      updateLabels();
+      if (paused) {
+        nextFetchAt = null;
+        el.nextFetchIn.textContent = '已暂停';
+        return;
+      }
+      const seconds = getIntervalSeconds();
+      nextFetchAt = new Date(Date.now() + seconds * 1000);
       timer = setTimeout(() => fetchData(false), seconds * 1000);
     }
     function updateClock() {
-      el.lastChangedAgo.textContent = lastChangedAt ? duration(Date.now() - lastChangedAt.getTime()) : "-";
-      el.nextFetchIn.textContent = nextFetchAt && !paused ? duration(nextFetchAt.getTime() - Date.now()) : (paused ? "已暂停" : "-");
+      el.lastChangedAgo.textContent = lastChangedAt ? duration(Date.now() - lastChangedAt.getTime()) : '-';
+      el.nextFetchIn.textContent = nextFetchAt && !paused ? duration(nextFetchAt.getTime() - Date.now()) : (paused ? '已暂停' : '-');
+      updateAlertStatus();
     }
-    el.saveBtn.addEventListener("click", () => { localStorage.setItem(STORAGE_INTERVAL_KEY, String(getIntervalSeconds())); updatePollIntervalLabel(); addLog(`<b class="green">已保存轮询间隔：${getIntervalSeconds()}秒</b><div class="muted">${nowText()}</div>`); scheduleNext(); });
-    el.refreshBtn.addEventListener("click", () => fetchData(true));
-    el.pauseBtn.addEventListener("click", () => {
+
+    el.alertBtn.addEventListener('click', enableAlerts);
+    el.testAlertBtn.addEventListener('click', () => {
+      if (!alertsEnabled || Notification.permission !== 'granted') {
+        enableAlerts();
+        return;
+      }
+      notifyNow('KR vs JP 测试提醒', '这是测试提醒。真实数据变化时也会这样通知。', true);
+    });
+    el.saveBtn.addEventListener('click', () => {
+      localStorage.setItem(STORAGE_INTERVAL_KEY, String(getIntervalSeconds()));
+      localStorage.setItem(STORAGE_COOLDOWN_KEY, String(getCooldownSeconds()));
+      updateLabels();
+      addLog(`<b class="green">已保存配置</b><div class="muted">${nowText()}</div><div>轮询间隔：${getIntervalSeconds()}秒，提醒冷却：${getCooldownSeconds()}秒</div>`);
+      scheduleNext();
+    });
+    el.refreshBtn.addEventListener('click', () => fetchData(true));
+    el.pauseBtn.addEventListener('click', () => {
       paused = !paused;
-      if (paused) { clearTimeout(timer); nextFetchAt = null; el.pauseBtn.textContent = "继续"; el.pauseBtn.className = ""; el.fetchStatus.textContent = "暂停"; el.fetchStatus.className = "v yellow"; }
-      else { el.pauseBtn.textContent = "暂停"; el.pauseBtn.className = "gray"; scheduleNext(); fetchData(true); }
+      if (paused) {
+        clearTimeout(timer);
+        nextFetchAt = null;
+        el.pauseBtn.textContent = '继续';
+        el.pauseBtn.className = '';
+        el.fetchStatus.textContent = '暂停';
+        el.fetchStatus.className = 'v yellow';
+      } else {
+        el.pauseBtn.textContent = '暂停';
+        el.pauseBtn.className = 'gray';
+        scheduleNext();
+        fetchData(true);
+      }
       updateClock();
     });
-    el.clearBtn.addEventListener("click", () => { el.logBox.innerHTML = `<div class="log-item muted">日志已清空</div>`; });
-    el.intervalInput.addEventListener("change", () => { localStorage.setItem(STORAGE_INTERVAL_KEY, String(getIntervalSeconds())); updatePollIntervalLabel(); scheduleNext(); });
+    el.clearBtn.addEventListener('click', () => { el.logBox.innerHTML = '<div class="log-item muted">日志已清空</div>'; });
+    el.intervalInput.addEventListener('change', () => { localStorage.setItem(STORAGE_INTERVAL_KEY, String(getIntervalSeconds())); updateLabels(); scheduleNext(); });
+    el.cooldownInput.addEventListener('change', () => { localStorage.setItem(STORAGE_COOLDOWN_KEY, String(getCooldownSeconds())); updateLabels(); });
 
     initSettings();
     clockTimer = setInterval(updateClock, 500);
