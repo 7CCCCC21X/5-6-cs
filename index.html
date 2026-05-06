@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KR vs JP Trading Worldcup 监控</title>
-  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=M3unpkr75lLq82HPVXaxgPHnkBakCdODjpDlj7UQvcoOj1O51lzdtu-PwMCjip7fwgKoUK46xZMIJwcgGhE8UWRFXipG7BNjmp7tcTg1MvdWDUbh-lfojjZt2c-rpnBaQ1zyKn35WTInN6zoSn3KLcOfSPDNFOSMmf7F6h2EiOkVOkYYg018oQXRIELnNF-uX9ma8hT70gEPCzFRoqHydl_wIPcPiKI_ugQymLP-kL8G7VdSPNLhQElSdFnaeg_oTV9aYMpQ7KRgyeYjWvR0yw" charset="UTF-8"></script><style>
+  <style>
     * { box-sizing: border-box; }
     :root {
       --bg: #070b14;
@@ -44,6 +44,13 @@
     button.red { background: #dc2626; } button.red:hover { background: #b91c1c; }
     button.green-btn { background: #16a34a; } button.green-btn:hover { background: #15803d; }
     .small-note { color: var(--muted); font-size: 12px; line-height: 1.7; margin-top: 10px; }
+    .formula-box { margin-top: 18px; background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 14px; color: #cbd5e1; line-height: 1.75; font-size: 14px; }
+    .formula-box code { color: #fde68a; background: rgba(250,204,21,.10); border: 1px solid rgba(250,204,21,.16); border-radius: 8px; padding: 2px 6px; }
+    .prob-table-wrap { margin-top: 14px; overflow: auto; background: var(--card2); border: 1px solid var(--border); border-radius: 16px; }
+    table { width: 100%; border-collapse: collapse; min-width: 680px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid rgba(148,163,184,.12); text-align: left; font-size: 13px; }
+    th { color: var(--muted); font-weight: 850; background: rgba(17,24,39,.52); }
+    tr:last-child td { border-bottom: 0; }
     .status { margin-top: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
     .stat { background: var(--card2); border: 1px solid var(--border); border-radius: 16px; padding: 15px; min-height: 92px; }
     .stat .k { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
@@ -87,6 +94,11 @@
             <label for="cooldownInput">提醒冷却/秒</label>
             <input id="cooldownInput" class="short-input" type="number" min="0" value="10" />
           </div>
+          <div>
+            <label for="futureVolInput">未来波动σ/U</label>
+            <input id="futureVolInput" class="short-input" type="number" min="1" value="10000" />
+          </div>
+          <button id="historyVolBtn" class="gray">按历史估算σ</button>
           <button id="alertBtn" class="green-btn">开启提醒</button>
           <button id="testAlertBtn" class="gray">测试提醒</button>
           <button id="saveBtn">保存</button>
@@ -123,6 +135,33 @@
         <div class="stat"><div class="k">当前轮询间隔</div><div class="v" id="pollInterval">10秒</div></div>
         <div class="stat"><div class="k">当前提醒冷却</div><div class="v" id="cooldownLabel">10秒</div></div>
       </div>
+      <div class="status">
+        <div class="stat"><div class="k">日本估算胜率</div><div class="v green" id="jpProb">-</div></div>
+        <div class="stat"><div class="k">韩国估算胜率</div><div class="v red" id="krProb">-</div></div>
+        <div class="stat"><div class="k">当前差值 Δ</div><div class="v" id="currentDiff">-</div></div>
+        <div class="stat"><div class="k">使用未来波动 σ</div><div class="v purple" id="futureVolUsed">-</div></div>
+      </div>
+
+      <div class="formula-box" id="probFormulaBox">
+        概率公式：<code>Δ = 日本PnL - 韩国PnL</code>，<code>日本胜率 = Φ(Δ / σ)</code>，<code>韩国胜率 = 1 - 日本胜率</code>。其中 <code>σ</code> 是你假设的剩余赛程 PnL 差值总波动。
+      </div>
+
+      <div class="prob-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>未来总波动 σ</th>
+              <th>日本胜率</th>
+              <th>韩国胜率</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody id="scenarioTableBody">
+            <tr><td colspan="4" class="muted">等待数据...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <div id="errorBox" class="error"></div>
       <div class="main-grid" id="teamGrid"></div>
     </section>
@@ -144,6 +183,7 @@
     const STORAGE_INTERVAL_KEY = 'kr_jp_monitor_interval';
     const STORAGE_COOLDOWN_KEY = 'kr_jp_monitor_alert_cooldown';
     const STORAGE_ALERTS_KEY = 'kr_jp_monitor_alerts_enabled';
+    const STORAGE_FUTURE_VOL_KEY = 'kr_jp_monitor_future_volatility';
     const ORIGINAL_TITLE = document.title;
 
     let paused = false;
@@ -161,20 +201,23 @@
     let lastChangedAt = null;
     let lastAlertTime = 0;
     let changeIntervals = [];
+    let diffHistory = [];
 
     const $ = id => document.getElementById(id);
     const el = {
-      intervalInput: $('intervalInput'), cooldownInput: $('cooldownInput'), alertBtn: $('alertBtn'), testAlertBtn: $('testAlertBtn'), saveBtn: $('saveBtn'), refreshBtn: $('refreshBtn'), pauseBtn: $('pauseBtn'), clearBtn: $('clearBtn'),
+      intervalInput: $('intervalInput'), cooldownInput: $('cooldownInput'), futureVolInput: $('futureVolInput'), historyVolBtn: $('historyVolBtn'), alertBtn: $('alertBtn'), testAlertBtn: $('testAlertBtn'), saveBtn: $('saveBtn'), refreshBtn: $('refreshBtn'), pauseBtn: $('pauseBtn'), clearBtn: $('clearBtn'),
       leader: $('leader'), pnlGap: $('pnlGap'), roiGap: $('roiGap'), totalVolume: $('totalVolume'), lastFetchAt: $('lastFetchAt'), lastChangedAgo: $('lastChangedAgo'),
       lastChangeInterval: $('lastChangeInterval'), avgChangeInterval: $('avgChangeInterval'), counts: $('counts'), sameCount: $('sameCount'), nextFetchIn: $('nextFetchIn'), fetchStatus: $('fetchStatus'),
-      alertStatus: $('alertStatus'), lastAlertAt: $('lastAlertAt'), pollInterval: $('pollInterval'), cooldownLabel: $('cooldownLabel'), errorBox: $('errorBox'), teamGrid: $('teamGrid'), logBox: $('logBox'), rawJson: $('rawJson')
+      alertStatus: $('alertStatus'), lastAlertAt: $('lastAlertAt'), pollInterval: $('pollInterval'), cooldownLabel: $('cooldownLabel'), jpProb: $('jpProb'), krProb: $('krProb'), currentDiff: $('currentDiff'), futureVolUsed: $('futureVolUsed'), probFormulaBox: $('probFormulaBox'), scenarioTableBody: $('scenarioTableBody'), errorBox: $('errorBox'), teamGrid: $('teamGrid'), logBox: $('logBox'), rawJson: $('rawJson')
     };
 
     function initSettings() {
       const savedInterval = localStorage.getItem(STORAGE_INTERVAL_KEY);
       const savedCooldown = localStorage.getItem(STORAGE_COOLDOWN_KEY);
+      const savedFutureVol = localStorage.getItem(STORAGE_FUTURE_VOL_KEY);
       if (savedInterval) el.intervalInput.value = savedInterval;
       if (savedCooldown) el.cooldownInput.value = savedCooldown;
+      if (savedFutureVol) el.futureVolInput.value = savedFutureVol;
       updateLabels();
       updateAlertStatus();
     }
@@ -189,9 +232,15 @@
       return Math.max(0, Number.isFinite(n) ? n : 10);
     }
 
+    function getFutureVolatility() {
+      const n = Number(el.futureVolInput.value || 10000);
+      return Math.max(1, Number.isFinite(n) ? n : 10000);
+    }
+
     function updateLabels() {
       el.pollInterval.textContent = getIntervalSeconds() + '秒';
       el.cooldownLabel.textContent = getCooldownSeconds() + '秒';
+      if (el.futureVolUsed) el.futureVolUsed.textContent = plainMoney(getFutureVolatility(), 0);
     }
 
     function updateAlertStatus() {
@@ -420,6 +469,159 @@
       if (oldLeader !== newLeader) lines.unshift(`<div class="yellow">领先方变化：${escapeHtml(oldLeader)} → <b>${escapeHtml(newLeader)}</b></div>`);
       return lines.length ? lines.join('') : '关键字段快照变化，但未识别到常规字段差异。';
     }
+
+    function getTeam(data, keyword) {
+      const k = String(keyword).toLowerCase();
+      return (data.teams || []).find(t =>
+        String(t.slug || '').toLowerCase().includes(k) ||
+        String(t.name || '').toLowerCase().includes(k)
+      );
+    }
+
+    function computeJapanMinusKorea(data) {
+      const japan = getTeam(data, 'japan');
+      const korea = getTeam(data, 'korea');
+      if (!japan || !korea) return null;
+      return toNum(japan.team_pnl) - toNum(korea.team_pnl);
+    }
+
+    function erf(x) {
+      const sign = x < 0 ? -1 : 1;
+      x = Math.abs(x);
+      const a1 = 0.254829592;
+      const a2 = -0.284496736;
+      const a3 = 1.421413741;
+      const a4 = -1.453152027;
+      const a5 = 1.061405429;
+      const p = 0.3275911;
+      const t = 1 / (1 + p * x);
+      const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+      return sign * y;
+    }
+
+    function normalCdf(x) {
+      return 0.5 * (1 + erf(x / Math.SQRT2));
+    }
+
+    function formatProbability(p) {
+      if (!Number.isFinite(p)) return '-';
+      return (p * 100).toFixed(2) + '%';
+    }
+
+    function estimateProbabilities(data, sigma = getFutureVolatility()) {
+      const diff = computeJapanMinusKorea(data);
+      if (diff === null) {
+        return { diff: null, sigma, jp: null, kr: null, z: null };
+      }
+
+      const z = diff / Math.max(1, sigma);
+      const jp = normalCdf(z);
+      const kr = 1 - jp;
+      return { diff, sigma, jp, kr, z };
+    }
+
+    function renderProbability(data) {
+      const sigma = getFutureVolatility();
+      const result = estimateProbabilities(data, sigma);
+
+      if (result.diff === null) {
+        el.jpProb.textContent = '-';
+        el.krProb.textContent = '-';
+        el.currentDiff.textContent = '-';
+        el.futureVolUsed.textContent = plainMoney(sigma, 0);
+        return;
+      }
+
+      el.jpProb.textContent = formatProbability(result.jp);
+      el.krProb.textContent = formatProbability(result.kr);
+      el.currentDiff.textContent = money(result.diff, 2);
+      el.currentDiff.className = 'v ' + clsByNum(result.diff);
+      el.futureVolUsed.textContent = plainMoney(sigma, 0);
+
+      el.probFormulaBox.innerHTML = `
+        概率公式：<code>Δ = 日本PnL - 韩国PnL = ${money(result.diff, 2)}</code>，
+        <code>z = Δ / σ = ${result.z.toFixed(4)}</code>，
+        <code>日本胜率 = Φ(z) = ${formatProbability(result.jp)}</code>，
+        <code>韩国胜率 = 1 - 日本胜率 = ${formatProbability(result.kr)}</code>。
+        这里把未来剩余赛程的 PnL 差值波动近似看成正态随机变量，σ 由你手动填写或用历史变化粗略估算。
+      `;
+
+      const scenarios = [2000, 5000, 10000, 20000, 30000];
+      el.scenarioTableBody.innerHTML = scenarios.map(v => {
+        const r = estimateProbabilities(data, v);
+        const note = v === sigma ? '当前使用参数' : (v < Math.abs(result.diff) ? '低波动，领先优势更重要' : '高波动，胜率更接近五五开');
+        return `
+          <tr>
+            <td>${plainMoney(v, 0)}</td>
+            <td class="green"><b>${formatProbability(r.jp)}</b></td>
+            <td class="red"><b>${formatProbability(r.kr)}</b></td>
+            <td class="muted">${note}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateDiffHistory(data, date = new Date()) {
+      const diff = computeJapanMinusKorea(data);
+      if (diff === null) return;
+
+      const last = diffHistory[diffHistory.length - 1];
+      if (last && last.diff === diff) return;
+
+      diffHistory.push({ t: date.getTime(), diff });
+
+      // 只保留最近 24 小时，避免很早的数据把当前波动稀释掉。
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      diffHistory = diffHistory.filter(x => x.t >= cutoff);
+    }
+
+    function getRemainingDays() {
+      // 0x1 页面显示本轮到北京时间 2026-06-05 22:59 左右结束。
+      const end = new Date('2026-06-05T22:59:00+08:00').getTime();
+      const days = (end - Date.now()) / (24 * 60 * 60 * 1000);
+      return Math.max(0.01, days);
+    }
+
+    function estimateSigmaFromHistory() {
+      if (diffHistory.length < 3) return null;
+
+      let sumVariancePerDay = 0;
+      let n = 0;
+
+      for (let i = 1; i < diffHistory.length; i += 1) {
+        const prev = diffHistory[i - 1];
+        const curr = diffHistory[i];
+        const dtDays = (curr.t - prev.t) / (24 * 60 * 60 * 1000);
+        if (dtDays <= 0) continue;
+
+        const d = curr.diff - prev.diff;
+        sumVariancePerDay += (d * d) / dtDays;
+        n += 1;
+      }
+
+      if (!n) return null;
+
+      const variancePerDay = sumVariancePerDay / n;
+      return Math.sqrt(variancePerDay * getRemainingDays());
+    }
+
+    function applyHistoryVolatility() {
+      const sigma = estimateSigmaFromHistory();
+
+      if (!sigma || !Number.isFinite(sigma)) {
+        addLog(`<b class="yellow">历史数据还不够</b><div class="muted">至少需要记录 2 次以上差值变化，才能粗略估算未来波动 σ。</div>`);
+        return;
+      }
+
+      el.futureVolInput.value = String(Math.round(sigma));
+      localStorage.setItem(STORAGE_FUTURE_VOL_KEY, String(Math.round(sigma)));
+      updateLabels();
+
+      if (lastData) renderProbability(lastData);
+
+      addLog(`<b class="green">已按历史变化估算 σ</b><div class="muted">估算未来总波动：${plainMoney(sigma, 0)}，剩余时间约 ${getRemainingDays().toFixed(2)} 天。</div>`);
+    }
+
     function renderTeams(data) {
       const leader = computeLeader(data);
       el.teamGrid.innerHTML = (data.teams || []).map(team => {
@@ -454,6 +656,7 @@
       el.lastChangeInterval.textContent = lastInterval ? duration(lastInterval) : '-';
       el.avgChangeInterval.textContent = avgInterval ? duration(avgInterval) : '-';
       el.rawJson.textContent = JSON.stringify(data, null, 2);
+      renderProbability(data);
       renderTeams(data);
     }
     async function fetchData(manual = false) {
@@ -475,6 +678,7 @@
         const data = normalizeData(await res.json());
         const snapshot = stableSnapshot(data);
         const now = new Date();
+        updateDiffHistory(data, now);
         el.lastFetchAt.textContent = nowText(now);
 
         if (lastSnapshot === null) {
@@ -539,8 +743,9 @@
     el.saveBtn.addEventListener('click', () => {
       localStorage.setItem(STORAGE_INTERVAL_KEY, String(getIntervalSeconds()));
       localStorage.setItem(STORAGE_COOLDOWN_KEY, String(getCooldownSeconds()));
+      localStorage.setItem(STORAGE_FUTURE_VOL_KEY, String(getFutureVolatility()));
       updateLabels();
-      addLog(`<b class="green">已保存配置</b><div class="muted">${nowText()}</div><div>轮询间隔：${getIntervalSeconds()}秒，提醒冷却：${getCooldownSeconds()}秒</div>`);
+      addLog(`<b class="green">已保存配置</b><div class="muted">${nowText()}</div><div>轮询间隔：${getIntervalSeconds()}秒，提醒冷却：${getCooldownSeconds()}秒，未来波动σ：${plainMoney(getFutureVolatility(), 0)}</div>`);
       scheduleNext();
     });
     el.refreshBtn.addEventListener('click', () => fetchData(true));
@@ -564,6 +769,12 @@
     el.clearBtn.addEventListener('click', () => { el.logBox.innerHTML = '<div class="log-item muted">日志已清空</div>'; });
     el.intervalInput.addEventListener('change', () => { localStorage.setItem(STORAGE_INTERVAL_KEY, String(getIntervalSeconds())); updateLabels(); scheduleNext(); });
     el.cooldownInput.addEventListener('change', () => { localStorage.setItem(STORAGE_COOLDOWN_KEY, String(getCooldownSeconds())); updateLabels(); });
+    el.futureVolInput.addEventListener('change', () => {
+      localStorage.setItem(STORAGE_FUTURE_VOL_KEY, String(getFutureVolatility()));
+      updateLabels();
+      if (lastData) renderProbability(lastData);
+    });
+    el.historyVolBtn.addEventListener('click', applyHistoryVolatility);
 
     initSettings();
     clockTimer = setInterval(updateClock, 500);
